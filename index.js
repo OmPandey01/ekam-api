@@ -1,0 +1,30 @@
+import "dotenv/config"; //newer way om
+import express from "express";
+import cookieParser from "cookie-parser";
+
+import authRouter from "./src/routes/authRoutes.js";
+import cors from "cors";
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Your Next.js port
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.use("/auth", authRouter);
+
+app.listen(4000, () => {
+  console.log("Server is running on port 4000");
+});
