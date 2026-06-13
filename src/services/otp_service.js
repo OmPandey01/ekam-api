@@ -1,6 +1,7 @@
 import redis from "./redis.js";
 import otpGenerator from "otp-generator";
 import prisma from "./db_services.js";
+import { resend } from "./email_service.js";
 
 class OTPService {
   // Generate a 6-digit OTP (valid for 5 minutes)
@@ -9,22 +10,32 @@ class OTPService {
       where: { id: userId },
       select: { email: true },
     });
-    const otpOriginal = otpGenerator.generate(6, {
+    const otp = otpGenerator.generate(6, {
       digits: true,
       lowerCaseAlphabets: false,
       upperCaseAlphabets: false,
       specialChars: false,
     });
 
-    const otp = 123456;
+    const otp1 = 123456;
 
     const key = `otp:${userId}`;
+    try {
+      // Store OTP in Redis with expiration
+      await redis.set(key, otp, "EX", expirySeconds);
+      await resend.emails.send({
+        from: "Verification@ekam.212labs.in",
+        to: email.email,
+        subject: `${otp} is your Ekam verification code`,
+        html: `<p>Your Ekam verification code is: <strong style="font-size: 18px; letter-spacing: 1px;">${otp}</strong></p>
+      <p style="color: #666; font-size: 14px;">Valid for 10 minutes. If you did not request this, please ignore this email.</p>`,
+      });
 
-    // Store OTP in Redis with expiration
-    await redis.set(key, otp, "EX", expirySeconds);
-
-    // For debugging (remove in production)
-    console.log(`OTP for ${email}: ${otp}`);
+      // For debugging (remove in production)
+      console.log(`OTP for ${email}: ${otp}`);
+    } catch (e) {
+      console.error(`Failed to send OTP for ${email}:`, e);
+    }
 
     return otp;
   }
