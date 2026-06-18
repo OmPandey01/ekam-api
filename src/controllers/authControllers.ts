@@ -3,6 +3,19 @@ import OTPService from "../services/otp_service.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+};
+
+type LoginResponse = {
+  success: boolean;
+  user: User;
+  isVerified: boolean;
+};
+
 export async function registerController(req, res) {
   const { email, password, name } = req.body;
 
@@ -15,7 +28,7 @@ export async function registerController(req, res) {
 
   if (existingUser && !existingUser.isVerified) {
     const otp = await OTPService.generateOTP(existingUser.id);
-    return res.status(400).json({
+    return res.status(403).json({
       isVerified: false,
       error: "User not verified",
       userId: existingUser.id,
@@ -57,15 +70,17 @@ export async function logInController(req, res) {
       where: { email: email },
     });
 
+    console.log("user", user);
+
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.isVerified) {
       const otp = await OTPService.generateOTP(user.id);
-      return res.status(401).json({
+      return res.status(403).json({
         error: "User not verified",
-        userId: user.id,
+        user: user,
         isVerified: false,
       });
     }
@@ -93,7 +108,17 @@ export async function logInController(req, res) {
       maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
     });
 
-    res.status(200).json(user);
+    const response: LoginResponse = {
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      isVerified: user.isVerified,
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

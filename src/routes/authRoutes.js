@@ -8,7 +8,7 @@ import {
   registerController,
   meController,
   logOutController,
-} from "../controllers/authControllers.js";
+} from "../controllers/authControllers.ts";
 
 router.post("/register", registerController);
 
