@@ -1,4 +1,4 @@
-import { verifyToken } from "../utils/token";
+import { verifyToken } from "../utils/token.js";
 
 export function auth(req, res, next) {
   //check if user is authenticated from http only cookie tokem

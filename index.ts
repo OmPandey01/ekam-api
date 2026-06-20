@@ -3,6 +3,9 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 import authRouter from "./src/routes/authRoutes.js";
+import publishedDocumentsRouter from "./src/routes/publishedDocumentsRoutes.js";
+import documentRouter from "./src/routes/documentRoutes.js";
+
 import cors from "cors";
 const app = express();
 
@@ -24,6 +27,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRouter);
+app.use("/documents", documentRouter);
+app.use("/articles", publishedDocumentsRouter);
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
