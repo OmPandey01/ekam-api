@@ -21,5 +21,69 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  documents          Documents[]
+  publishedDocuments PublishedDocuments[]
+  appreciations      Appreciation[]
+  bookmarks          Bookmarks[]
+
+  @@schema("public")
+}
+
+model Documents {
+  id                 String               @id @default(uuid())
+  document_id        String
+  author             User                 @relation(fields: [author_id], references: [id])
+  author_id          String
+  data               Json
+  isPublished        Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  publishedDocuments PublishedDocuments[]
+  bookmarks          Bookmarks[]
+
+  @@schema("public")
+}
+
+model PublishedDocuments {
+  id                String         @id @default(uuid())
+  title             String
+  document_id       String
+  author_id         String
+  thumbnail         String         @default("null")
+  categories        String         @default("null")
+  views             Int            @default(0)
+  appreciationCount Int            @default(0)
+  appreciations     Appreciation[]
+
+  document  Documents @relation(fields: [document_id], references: [id])
+  author    User      @relation(fields: [author_id], references: [id])
+  // category    String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@schema("public")
+}
+
+model Appreciation {
+  id                  String             @id @default(uuid())
+  userId              String
+  user                User               @relation(fields: [userId], references: [id])
+  publishedDocumentId String
+  publishedDocument   PublishedDocuments @relation(fields: [publishedDocumentId], references: [id])
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@schema("public")
+}
+
+model Bookmarks {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  documentId String
+  document   Documents @relation(fields: [documentId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
   @@schema("public")
 }
