@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createDocumentController,
+  syncDocumentController,
   updateDocumentController,
   deleteDocumentController,
   getDocumentByIdController,
@@ -16,7 +16,7 @@ import { auth } from "../middilewares/authenticated-middileware.ts";
 const router = express.Router();
 
 // Create a new document
-router.post("/create", auth, createDocumentController);
+router.post("/syncDocument", auth, syncDocumentController);
 
 // Update a document (Author only)
 router.put("/:id", auth, updateDocumentController);
@@ -37,7 +37,7 @@ router.get("/unpublished/me", auth, getUnpublishedDocumentsController);
 router.get("/unpublished/:id", auth, getUnpublishedDocumentByIdController);
 
 // Get all published documents
-router.get("/published/all", getPublishedDocumentsController);
+router.get("/published/all", auth, getPublishedDocumentsController);
 
 // Get documents by a specific author
 router.get("/author/:authorId", getDocumentsByAuthorController);

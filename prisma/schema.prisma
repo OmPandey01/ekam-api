@@ -31,7 +31,7 @@ model User {
 
 model Documents {
   id                 String               @id @default(uuid())
-  document_id        String
+  document_id        String               @unique
   author             User                 @relation(fields: [author_id], references: [id])
   author_id          String
   data               Json

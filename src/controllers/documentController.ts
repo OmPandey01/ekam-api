@@ -2,16 +2,40 @@ import { Request, Response } from "express";
 import prisma from "../services/db_services";
 
 // Create a new document (unpublished by default based on schema)
-export const createDocumentController = async (req: Request, res: Response) => {
+export const syncDocumentController = async (req: Request, res: Response) => {
   try {
-    const { document_id, data } = req.body;
-    const author_id = req.user.id; // Assuming auth middleware injects user object
+    const { document_id, document } = req.body;
+    const author_id = req.user.userId; // Assuming auth middleware injects user object
+
+    //check if document exists
+    const existingDocument = await prisma.documents.findUnique({
+      where: { document_id, author_id },
+    });
+
+    if (existingDocument) {
+      //update existing document
+      const updatedDocument = await prisma.documents.update({
+        where: { document_id, author_id },
+        data: {
+          data: document,
+          // isPublished: false,
+        },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Document updated successfully",
+        document: updatedDocument,
+      });
+    }
 
     const newDocument = await prisma.documents.create({
       data: {
         document_id,
-        author_id,
-        data,
+        author: {
+          connect: { id: author_id },
+        },
+        data: document,
         isPublished: false, // Explicitly setting default
       },
     });
@@ -117,10 +141,12 @@ export const publishDocumentController = async (
 ) => {
   try {
     const { id } = req.params;
-    const { title, thumbnail, categories } = req.body;
-    const userId = req.user.id;
 
-    const document = await prisma.documents.findUnique({ where: { id } });
+    const userId = req.user.userId;
+
+    const document = await prisma.documents.findUnique({
+      where: { document_id: id, author_id: userId, isPublished: false },
+    });
 
     if (!document) {
       return res
@@ -145,16 +171,16 @@ export const publishDocumentController = async (
     // Transaction to update isPublished flag AND create the PublishedDocuments record
     const result = await prisma.$transaction([
       prisma.documents.update({
-        where: { id },
+        where: { document_id: id },
         data: { isPublished: true },
       }),
       prisma.publishedDocuments.create({
         data: {
-          title,
+          title: "Untitiled",
           document_id: document.id, // Maps to Documents.id
           author_id: userId,
-          thumbnail: thumbnail || "null",
-          categories: categories || "null",
+          // thumbnail: thumbnail || "null",
+          // categories: categories || "null",
         },
       }),
     ]);
@@ -206,7 +232,7 @@ export const getUnpublishedDocumentsController = async (
   res: Response,
 ) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const documents = await prisma.documents.findMany({
       where: { author_id: userId, isPublished: false },
