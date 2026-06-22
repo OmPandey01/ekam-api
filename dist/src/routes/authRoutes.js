@@ -1,0 +1,10 @@
+import express from "express";
+const router = express.Router();
+import { logInController, otpVerificationController, registerController, meController, logOutController, resendOtpController, } from "../controllers/authControllers.ts";
+router.post("/register", registerController);
+router.post("/login", logInController);
+router.post("/logout", logOutController);
+router.post("/verify-otp", otpVerificationController);
+router.get("/me", meController);
+router.get("/resend-otp/:id", resendOtpController);
+export default router;

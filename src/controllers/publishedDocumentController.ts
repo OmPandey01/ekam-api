@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from "express";
-import prisma from "../services/db_services";
+import { Response, NextFunction } from "express";
+import prisma from "../services/db_services.js";
+import { Prisma } from "@prisma/client";
 
 // 1. Get a single published document by ID (Increments views)
 export const getPublishedDocumentByIdController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -41,7 +42,7 @@ export const getPublishedDocumentByIdController = async (
 
 // 2. Search Published Documents (by title, category, author, timeline)
 export const searchPublishedDocumentsController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -99,10 +100,7 @@ export const searchPublishedDocumentsController = async (
 };
 
 // 3. Toggle Appreciation (Like/Unlike)
-export const toggleAppreciationController = async (
-  req: Request,
-  res: Response,
-) => {
+export const toggleAppreciationController = async (req: any, res: Response) => {
   try {
     const { id } = req.params; // PublishedDocument ID
     const userId = req.user.id;
@@ -163,7 +161,7 @@ export const toggleAppreciationController = async (
 };
 
 // 4. Toggle Bookmark (Save/Unsave)
-export const toggleBookmarkController = async (req: Request, res: Response) => {
+export const toggleBookmarkController = async (req: any, res: Response) => {
   try {
     const { id } = req.params; // PublishedDocument ID
     const userId = req.user.id;
@@ -210,10 +208,7 @@ export const toggleBookmarkController = async (req: Request, res: Response) => {
 };
 
 // 5. Get User's Bookmarked Documents
-export const getUserBookmarksController = async (
-  req: Request,
-  res: Response,
-) => {
+export const getUserBookmarksController = async (req: any, res: Response) => {
   try {
     const userId = req.user.id;
 
@@ -242,7 +237,7 @@ export const getUserBookmarksController = async (
 };
 
 // Get "For You" Feed (Top 15 latest published articles)
-export const getForYouFeedController = async (req: Request, res: Response) => {
+export const getForYouFeedController = async (req: any, res: Response) => {
   try {
     const feed = await prisma.publishedDocuments.findMany({
       take: 15, // Limits to 15 or less
@@ -273,7 +268,7 @@ export const getForYouFeedController = async (req: Request, res: Response) => {
 };
 
 export const getFeaturedArticlesController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {

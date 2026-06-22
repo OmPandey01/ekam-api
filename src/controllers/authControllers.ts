@@ -1,4 +1,3 @@
-import { Z_NEED_DICT } from "zlib";
 import prisma from "../services/db_services.js";
 import OTPService from "../services/otp_service.js";
 import bcrypt from "bcryptjs";

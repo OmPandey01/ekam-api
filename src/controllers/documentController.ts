@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import prisma from "../services/db_services";
+import { Response } from "express";
+import prisma from "../services/db_services.js";
 
 // Create a new document (unpublished by default based on schema)
-export const syncDocumentController = async (req: Request, res: Response) => {
+export const syncDocumentController = async (req: any, res: Response) => {
   try {
     const { document_id, document } = req.body;
     const author_id = req.user.userId; // Assuming auth middleware injects user object
@@ -54,7 +54,7 @@ export const syncDocumentController = async (req: Request, res: Response) => {
 };
 
 // Update Document (Verifies author)
-export const updateDocumentController = async (req: Request, res: Response) => {
+export const updateDocumentController = async (req: any, res: Response) => {
   try {
     const { document_id } = req.params;
     const { data } = req.body;
@@ -78,7 +78,7 @@ export const updateDocumentController = async (req: Request, res: Response) => {
     }
 
     const updatedDocument = await prisma.documents.update({
-      where: { id },
+      where: { document_id },
       data: { data },
     });
 
@@ -96,7 +96,7 @@ export const updateDocumentController = async (req: Request, res: Response) => {
 };
 
 // Delete Document (Verifies author)
-export const deleteDocumentController = async (req: Request, res: Response) => {
+export const deleteDocumentController = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -135,10 +135,7 @@ export const deleteDocumentController = async (req: Request, res: Response) => {
 };
 
 // Publish Document (Verifies author)
-export const publishDocumentController = async (
-  req: Request,
-  res: Response,
-) => {
+export const publishDocumentController = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -154,7 +151,7 @@ export const publishDocumentController = async (
         .json({ success: false, message: "Document not found" });
     }
 
-    // Verify that document's author and requesting user are the same
+    // Verify that document's author and anying user are the same
     if (document.author_id !== userId) {
       return res.status(403).json({
         success: false,
@@ -199,10 +196,7 @@ export const publishDocumentController = async (
 };
 
 // Get a single document by ID
-export const getDocumentByIdController = async (
-  req: Request,
-  res: Response,
-) => {
+export const getDocumentByIdController = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -228,7 +222,7 @@ export const getDocumentByIdController = async (
 
 // Get a specific user's unpublished documents
 export const getUnpublishedDocumentsController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -251,7 +245,7 @@ export const getUnpublishedDocumentsController = async (
 
 // Get a specific user's unpublished document by ID
 export const getUnpublishedDocumentByIdController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -279,7 +273,7 @@ export const getUnpublishedDocumentByIdController = async (
 
 // Get all published documents
 export const getPublishedDocumentsController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -301,7 +295,7 @@ export const getPublishedDocumentsController = async (
 
 // Get documents by Author
 export const getDocumentsByAuthorController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
@@ -324,7 +318,7 @@ export const getDocumentsByAuthorController = async (
 
 // Get documents by Category
 export const getDocumentsByCategoryController = async (
-  req: Request,
+  req: any,
   res: Response,
 ) => {
   try {
