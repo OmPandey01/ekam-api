@@ -1,3 +1,4 @@
+import { Z_NEED_DICT } from "zlib";
 import prisma from "../services/db_services.js";
 import OTPService from "../services/otp_service.js";
 import bcrypt from "bcryptjs";
@@ -27,11 +28,17 @@ export async function registerController(req, res) {
   });
 
   if (existingUser && !existingUser.isVerified) {
+    console.log(
+      "Got existing user with id in register controller",
+      existingUser.id,
+    );
     const otp = await OTPService.generateOTP(existingUser.id);
+
     return res.status(403).json({
       isVerified: false,
       error: "User not verified",
       userId: existingUser.id,
+      needsVerification: true,
     });
   }
 
@@ -40,6 +47,8 @@ export async function registerController(req, res) {
       isVerified: true,
       error: "User already exists",
       userId: existingUser.id,
+      user: existingUser,
+      needsVerification: false,
     });
   }
 
@@ -182,6 +191,16 @@ export async function meController(req, res) {
     }
     res.status(200).json(user);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function resendOtpController(req, res) {
+  const { id } = req.params;
+  try {
+    await OTPService.generateOTP(id);
+    res.status(200).json({ message: "OTP resent successfully" });
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 }

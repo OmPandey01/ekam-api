@@ -31,6 +31,8 @@ class OTPService {
       <p style="color: #666; font-size: 14px;">Valid for 10 minutes. If you did not request this, please ignore this email.</p>`,
       });
 
+      console.log("🗒️ OTP sent to", email.email);
+
       // For debugging (remove in production)
       console.log(`OTP for ${email}: ${otp}`);
     } catch (e) {

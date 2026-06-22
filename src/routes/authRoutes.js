@@ -8,6 +8,7 @@ import {
   registerController,
   meController,
   logOutController,
+  resendOtpController,
 } from "../controllers/authControllers.ts";
 
 router.post("/register", registerController);
@@ -18,5 +19,6 @@ router.post("/logout", logOutController);
 router.post("/verify-otp", otpVerificationController);
 
 router.get("/me", meController);
+router.get("/resend-otp/:id", resendOtpController);
 
 export default router;
