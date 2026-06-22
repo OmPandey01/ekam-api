@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { logInController, otpVerificationController, registerController, meController, logOutController, resendOtpController, } from "../controllers/authControllers.ts";
+import { logInController, otpVerificationController, registerController, meController, logOutController, resendOtpController, } from "../controllers/authControllers.js";
 router.post("/register", registerController);
 router.post("/login", logInController);
 router.post("/logout", logOutController);

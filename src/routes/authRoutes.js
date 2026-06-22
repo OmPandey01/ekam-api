@@ -9,7 +9,7 @@ import {
   meController,
   logOutController,
   resendOtpController,
-} from "../controllers/authControllers.ts";
+} from "../controllers/authControllers.js";
 
 router.post("/register", registerController);
 

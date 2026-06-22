@@ -10,8 +10,8 @@ import {
   getDocumentsByAuthorController,
   getDocumentsByCategoryController,
   publishDocumentController, // Added the publish controller
-} from "../controllers/documentController.ts"; // Adjust path as necessary
-import { auth } from "../middilewares/authenticated-middileware.ts";
+} from "../controllers/documentController.js"; // Adjust path as necessary
+import { auth } from "../middilewares/authenticated-middileware.js";
 
 const router = express.Router();
 

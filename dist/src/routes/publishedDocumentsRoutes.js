@@ -1,6 +1,6 @@
 import express from "express";
-import { getPublishedDocumentByIdController, searchPublishedDocumentsController, toggleAppreciationController, toggleBookmarkController, getUserBookmarksController, getFeaturedArticlesController, getForYouFeedController, } from "../controllers/publishedDocumentController.ts";
-import { auth } from "../middilewares/authenticated-middileware.ts";
+import { getPublishedDocumentByIdController, searchPublishedDocumentsController, toggleAppreciationController, toggleBookmarkController, getUserBookmarksController, getFeaturedArticlesController, getForYouFeedController, } from "../controllers/publishedDocumentController.js";
+import { auth } from "../middilewares/authenticated-middileware.js";
 const router = express.Router();
 // Search published documents (Query params: ?q=title&category=cat&author=name&startDate=...&endDate=...)
 router.get("/search", auth, searchPublishedDocumentsController);

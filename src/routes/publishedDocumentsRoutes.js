@@ -7,8 +7,8 @@ import {
   getUserBookmarksController,
   getFeaturedArticlesController,
   getForYouFeedController,
-} from "../controllers/publishedDocumentController.ts";
-import { auth } from "../middilewares/authenticated-middileware.ts";
+} from "../controllers/publishedDocumentController.js";
+import { auth } from "../middilewares/authenticated-middileware.js";
 
 const router = express.Router();
 
