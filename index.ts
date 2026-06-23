@@ -14,15 +14,35 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Your Next.js port
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+const allowedOrigins = [
+  process.env.FRONTEND_URL_ekam,
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[]; // Removes undefined, null, or ""
 
+const corsOptions = {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void,
+  ) => {
+    // Allow requests with no origin (like mobile apps, curl, or Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // Check if the incoming origin is in your allowed list
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// Apply middleware
+app.use(cors(corsOptions));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
