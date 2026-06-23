@@ -17,7 +17,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL_ekam,
   process.env.FRONTEND_URL,
-].filter(Boolean) as string[]; // Removes undefined, null, or ""
+]; // Removes undefined, null, or ""
 
 const corsOptions = {
   origin: (
