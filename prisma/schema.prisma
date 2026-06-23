@@ -31,7 +31,7 @@ model User {
 
 model Documents {
   id                 String               @id @default(uuid())
-  document_id        String               @unique
+  document_id        String
   author             User                 @relation(fields: [author_id], references: [id])
   author_id          String
   data               Json
@@ -41,6 +41,7 @@ model Documents {
   publishedDocuments PublishedDocuments[]
   bookmarks          Bookmarks[]
 
+  @@unique([document_id, author_id])
   @@schema("public")
 }
 
@@ -55,7 +56,7 @@ model PublishedDocuments {
   appreciationCount Int            @default(0)
   appreciations     Appreciation[]
 
-  document  Documents @relation(fields: [document_id], references: [id])
+  document  Documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
   author    User      @relation(fields: [author_id], references: [id])
   // category    String[]
   createdAt DateTime  @default(now())

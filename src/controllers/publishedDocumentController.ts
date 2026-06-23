@@ -31,7 +31,7 @@ export const getPublishedDocumentByIdController = async (
       data: { views: { increment: 1 } },
     });
 
-    return res.status(200).json({ success: true, document });
+    return res.status(200).json({ success: true, document: document.document });
   } catch (error) {
     console.error("Get Published Document Error:", error);
     return res
@@ -293,7 +293,7 @@ export const getFeaturedArticlesController = async (
       feed,
     });
   } catch (error) {
-    console.error("Get For You Feed Error:", error);
+    console.error("Featured Feed Error:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });

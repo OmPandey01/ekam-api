@@ -29,7 +29,7 @@ router.post("/:id/bookmark", auth, toggleBookmarkController);
 
 // Get featured articles
 // "For You" feed - Top 15 latest articles
-router.get("/for-you", auth, getForYouFeedController);
-router.get("/featured", auth, getFeaturedArticlesController);
+router.get("/published/for-you", auth, getForYouFeedController);
+router.get("/published/featured", getFeaturedArticlesController);
 
 export default router;

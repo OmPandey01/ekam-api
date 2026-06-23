@@ -17,6 +17,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL_ekam,
   process.env.FRONTEND_URL,
+  "http://localhost:3000",
 ]; // Removes undefined, null, or ""
 
 const corsOptions = {
