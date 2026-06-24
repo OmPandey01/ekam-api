@@ -21,7 +21,7 @@ export const getPublishedDocumentByIdController = async (req, res) => {
             where: { id },
             data: { views: { increment: 1 } },
         });
-        return res.status(200).json({ success: true, document });
+        return res.status(200).json({ success: true, document: document.document });
     }
     catch (error) {
         console.error("Get Published Document Error:", error);
@@ -85,7 +85,7 @@ export const searchPublishedDocumentsController = async (req, res) => {
 export const toggleAppreciationController = async (req, res) => {
     try {
         const { id } = req.params; // PublishedDocument ID
-        const userId = req.user.id;
+        const userId = req.user.userId;
         const publishedDoc = await prisma.publishedDocuments.findUnique({
             where: { id },
         });
@@ -142,7 +142,7 @@ export const toggleAppreciationController = async (req, res) => {
 export const toggleBookmarkController = async (req, res) => {
     try {
         const { id } = req.params; // PublishedDocument ID
-        const userId = req.user.id;
+        const userId = req.user.userId;
         const publishedDoc = await prisma.publishedDocuments.findUnique({
             where: { id },
         });
@@ -185,7 +185,7 @@ export const toggleBookmarkController = async (req, res) => {
 // 5. Get User's Bookmarked Documents
 export const getUserBookmarksController = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.userId;
         const bookmarks = await prisma.bookmarks.findMany({
             where: { userId },
             include: {
@@ -262,7 +262,7 @@ export const getFeaturedArticlesController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Get For You Feed Error:", error);
+        console.error("Featured Feed Error:", error);
         return res
             .status(500)
             .json({ success: false, message: "Internal Server Error" });

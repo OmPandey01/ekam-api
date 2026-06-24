@@ -103,7 +103,7 @@ export const searchPublishedDocumentsController = async (
 export const toggleAppreciationController = async (req: any, res: Response) => {
   try {
     const { id } = req.params; // PublishedDocument ID
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const publishedDoc = await prisma.publishedDocuments.findUnique({
       where: { id },
@@ -164,7 +164,7 @@ export const toggleAppreciationController = async (req: any, res: Response) => {
 export const toggleBookmarkController = async (req: any, res: Response) => {
   try {
     const { id } = req.params; // PublishedDocument ID
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const publishedDoc = await prisma.publishedDocuments.findUnique({
       where: { id },
@@ -210,7 +210,7 @@ export const toggleBookmarkController = async (req: any, res: Response) => {
 // 5. Get User's Bookmarked Documents
 export const getUserBookmarksController = async (req: any, res: Response) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const bookmarks = await prisma.bookmarks.findMany({
       where: { userId },

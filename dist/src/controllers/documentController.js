@@ -3,47 +3,53 @@ import prisma from "../services/db_services.js";
 export const syncDocumentController = async (req, res) => {
     try {
         const { document_id, document } = req.body;
-        const author_id = req.user.userId; // Assuming auth middleware injects user object
-        //check if document exists
-        const existingDocument = await prisma.documents.findUnique({
-            where: { document_id, author_id },
+        const author_id = req.user.userId;
+        // 1. Validate the user exists
+        const userExists = await prisma.user.findUnique({
+            where: { id: author_id },
         });
-        if (existingDocument) {
-            //update existing document
-            const updatedDocument = await prisma.documents.update({
-                where: { document_id, author_id },
-                data: {
-                    data: document,
-                    // isPublished: false,
-                },
-            });
-            return res.status(200).json({
-                success: true,
-                message: "Document updated successfully",
-                document: updatedDocument,
+        if (!userExists) {
+            return res.status(404).json({
+                success: false,
+                error: "Author not found. Cannot create document.",
             });
         }
-        const newDocument = await prisma.documents.create({
-            data: {
+        console.log("✏️ Syncing Document:", document_id, "for Author:", author_id);
+        // 2. Perform an atomic upsert operation
+        const syncedDocument = await prisma.documents.upsert({
+            where: {
+                document_id_author_id: {
+                    document_id,
+                    author_id,
+                },
+            },
+            update: {
+                data: document,
+            },
+            create: {
                 document_id,
+                data: document,
                 author: {
                     connect: { id: author_id },
                 },
-                data: document,
-                isPublished: false, // Explicitly setting default
             },
         });
-        return res.status(201).json({
+        // 3. Determine if it was created or updated to return the correct status code
+        const isNew = syncedDocument.createdAt.getTime() === syncedDocument.updatedAt.getTime();
+        return res.status(isNew ? 201 : 200).json({
             success: true,
-            message: "Document created successfully",
-            document: newDocument,
+            message: isNew
+                ? "Document created successfully"
+                : "Document updated successfully",
+            document: syncedDocument,
         });
     }
     catch (error) {
-        console.error("Create Document Error:", error);
-        return res
-            .status(500)
-            .json({ success: false, message: "Internal Server Error" });
+        console.error("Sync Document Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
 };
 // Update Document (Verifies author)
@@ -51,9 +57,9 @@ export const updateDocumentController = async (req, res) => {
     try {
         const { document_id } = req.params;
         const { data } = req.body;
-        const userId = req.user.id;
+        const userId = req.user.userId;
         const document = await prisma.documents.findUnique({
-            where: { document_id },
+            where: { document_id_author_id: { document_id, author_id: userId } },
         });
         if (!document) {
             return res
@@ -67,7 +73,7 @@ export const updateDocumentController = async (req, res) => {
             });
         }
         const updatedDocument = await prisma.documents.update({
-            where: { document_id },
+            where: { document_id_author_id: { document_id, author_id: userId } },
             data: { data },
         });
         return res.status(200).json({
@@ -87,8 +93,11 @@ export const updateDocumentController = async (req, res) => {
 export const deleteDocumentController = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user.id;
-        const document = await prisma.documents.findUnique({ where: { id } });
+        const userId = req.user.userId;
+        console.log("User who is requesting to delete is ", userId);
+        const document = await prisma.documents.findUnique({
+            where: { document_id_author_id: { document_id: id, author_id: userId } },
+        });
         if (!document) {
             return res
                 .status(404)
@@ -101,10 +110,12 @@ export const deleteDocumentController = async (req, res) => {
             });
         }
         // Transaction ensures both Document and PublishedDocument (if exists) are deleted
-        await prisma.$transaction([
-            prisma.publishedDocuments.deleteMany({ where: { document_id: id } }),
-            prisma.documents.delete({ where: { id } }),
-        ]);
+        await prisma.documents.delete({
+            where: {
+                document_id_author_id: { document_id: id, author_id: userId },
+            },
+            //foreign key delete
+        });
         return res.status(200).json({
             success: true,
             message: "Document deleted successfully",
@@ -121,9 +132,10 @@ export const deleteDocumentController = async (req, res) => {
 export const publishDocumentController = async (req, res) => {
     try {
         const { id } = req.params;
+        const { title } = req.body;
         const userId = req.user.userId;
         const document = await prisma.documents.findUnique({
-            where: { document_id: id, author_id: userId, isPublished: false },
+            where: { document_id_author_id: { document_id: id, author_id: userId } },
         });
         if (!document) {
             return res
@@ -145,12 +157,14 @@ export const publishDocumentController = async (req, res) => {
         // Transaction to update isPublished flag AND create the PublishedDocuments record
         const result = await prisma.$transaction([
             prisma.documents.update({
-                where: { document_id: id },
+                where: {
+                    document_id_author_id: { document_id: id, author_id: userId },
+                },
                 data: { isPublished: true },
             }),
             prisma.publishedDocuments.create({
                 data: {
-                    title: "Untitiled",
+                    title: title ?? "Untitled",
                     document_id: document.id, // Maps to Documents.id
                     author_id: userId,
                     // thumbnail: thumbnail || "null",
@@ -176,9 +190,12 @@ export const getDocumentByIdController = async (req, res) => {
     try {
         const { id } = req.params;
         const document = await prisma.documents.findUnique({
-            where: { id },
+            where: {
+                document_id_author_id: { document_id: id, author_id: req.user.userId },
+            },
             include: { author: true, publishedDocuments: true },
         });
+        console.log("Got request for document", document);
         if (!document) {
             return res
                 .status(404)
@@ -197,6 +214,7 @@ export const getDocumentByIdController = async (req, res) => {
 export const getUnpublishedDocumentsController = async (req, res) => {
     try {
         const userId = req.user.userId;
+        console.log("🥲 got user to get all docs", userId);
         const documents = await prisma.documents.findMany({
             where: { author_id: userId, isPublished: false },
         });
@@ -215,7 +233,7 @@ export const getUnpublishedDocumentsController = async (req, res) => {
 export const getUnpublishedDocumentByIdController = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user.id;
+        const userId = req.user.userId;
         const document = await prisma.documents.findFirst({
             where: { id, author_id: userId, isPublished: false },
         });
@@ -235,14 +253,22 @@ export const getUnpublishedDocumentByIdController = async (req, res) => {
 };
 // Get all published documents
 export const getPublishedDocumentsController = async (req, res) => {
+    const authorId = req.user.userId;
     try {
         const documents = await prisma.publishedDocuments.findMany({
-            include: { appreciations: true },
+            where: { author_id: authorId },
+            include: {
+                document: true,
+                author: true,
+                _count: true,
+            },
             orderBy: { createdAt: "desc" },
         });
-        return res
-            .status(200)
-            .json({ success: true, count: documents.length, documents });
+        return res.status(200).json({
+            success: true,
+            count: documents.length,
+            documents: documents,
+        });
     }
     catch (error) {
         console.error("Get Published Documents Error:", error);

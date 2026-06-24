@@ -69,10 +69,10 @@ export const updateDocumentController = async (req: any, res: Response) => {
   try {
     const { document_id } = req.params;
     const { data } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const document = await prisma.documents.findUnique({
-      where: { document_id },
+      where: { document_id_author_id: { document_id, author_id: userId } },
     });
 
     if (!document) {
@@ -89,7 +89,7 @@ export const updateDocumentController = async (req: any, res: Response) => {
     }
 
     const updatedDocument = await prisma.documents.update({
-      where: { document_id },
+      where: { document_id_author_id: { document_id, author_id: userId } },
       data: { data },
     });
 
@@ -273,7 +273,7 @@ export const getUnpublishedDocumentByIdController = async (
 ) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const document = await prisma.documents.findFirst({
       where: { id, author_id: userId, isPublished: false },
@@ -299,7 +299,7 @@ export const getPublishedDocumentsController = async (
   req: any,
   res: Response,
 ) => {
-  const authorId = req.user.id;
+  const authorId = req.user.userId;
   try {
     const documents = await prisma.publishedDocuments.findMany({
       where: { author_id: authorId },

@@ -17,10 +17,12 @@ router.get("/:id", auth, getDocumentByIdController);
 router.get("/unpublished/me", auth, getUnpublishedDocumentsController);
 // Get a specific unpublished document by ID for the authenticated user
 router.get("/unpublished/:id", auth, getUnpublishedDocumentByIdController);
-// Get all published documents
+// Get all published documents of a specific author
 router.get("/published/all", auth, getPublishedDocumentsController);
 // Get documents by a specific author
 router.get("/author/:authorId", getDocumentsByAuthorController);
 // Get published documents by category
 router.get("/category/:category", auth, getDocumentsByCategoryController);
+// Delete a published document (Author only)
+router.delete("/:id", auth, deleteDocumentController);
 export default router;
