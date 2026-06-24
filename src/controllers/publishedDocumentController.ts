@@ -278,6 +278,7 @@ export const getFeaturedArticlesController = async (
         createdAt: "desc", // Gets the latest articles first
       },
       include: {
+        
         author: {
           select: {
             id: true,

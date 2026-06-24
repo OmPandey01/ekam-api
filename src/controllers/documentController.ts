@@ -1,6 +1,7 @@
 import { Response } from "express";
 import prisma from "../services/db_services.js";
 import { Prisma } from "@prisma/client";
+import { title } from "node:process";
 
 // Create a new document (unpublished by default based on schema)
 export const syncDocumentController = async (req: any, res: Response) => {
@@ -36,6 +37,7 @@ export const syncDocumentController = async (req: any, res: Response) => {
       create: {
         document_id,
         data: document,
+
         author: {
           connect: { id: author_id },
         },
@@ -153,6 +155,7 @@ export const deleteDocumentController = async (req: any, res: Response) => {
 export const publishDocumentController = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
+    const { title } = req.body;
 
     const userId = req.user.userId;
 
@@ -190,7 +193,7 @@ export const publishDocumentController = async (req: any, res: Response) => {
       }),
       prisma.publishedDocuments.create({
         data: {
-          title: "Untitiled",
+          title: title ?? "Untitled",
           document_id: document.id, // Maps to Documents.id
           author_id: userId,
           // thumbnail: thumbnail || "null",
@@ -218,9 +221,12 @@ export const getDocumentByIdController = async (req: any, res: Response) => {
     const { id } = req.params;
 
     const document = await prisma.documents.findUnique({
-      where: { id },
+      where: {
+        document_id_author_id: { document_id: id, author_id: req.user.userId },
+      },
       include: { author: true, publishedDocuments: true },
     });
+    console.log("Got request for document", document);
 
     if (!document) {
       return res
