@@ -132,7 +132,7 @@ export const deleteDocumentController = async (req, res) => {
 export const publishDocumentController = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title } = req.body;
+        const { title, thumbnailUrl, categories } = req.body;
         const userId = req.user.userId;
         const document = await prisma.documents.findUnique({
             where: { document_id_author_id: { document_id: id, author_id: userId } },
@@ -167,8 +167,8 @@ export const publishDocumentController = async (req, res) => {
                     title: title ?? "Untitled",
                     document_id: document.id, // Maps to Documents.id
                     author_id: userId,
-                    // thumbnail: thumbnail || "null",
-                    // categories: categories || "null",
+                    thumbnail: thumbnailUrl,
+                    categories: categories || [],
                 },
             }),
         ]);
@@ -300,7 +300,11 @@ export const getDocumentsByCategoryController = async (req, res) => {
     try {
         const { category } = req.params;
         const documents = await prisma.publishedDocuments.findMany({
-            where: { categories: category },
+            where: {
+                categories: {
+                    has: category,
+                },
+            },
         });
         return res
             .status(200)

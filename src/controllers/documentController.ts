@@ -155,7 +155,7 @@ export const deleteDocumentController = async (req: any, res: Response) => {
 export const publishDocumentController = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
-    const { title } = req.body;
+    const { title, thumbnailUrl, categories } = req.body;
 
     const userId = req.user.userId;
 
@@ -196,8 +196,8 @@ export const publishDocumentController = async (req: any, res: Response) => {
           title: title ?? "Untitled",
           document_id: document.id, // Maps to Documents.id
           author_id: userId,
-          // thumbnail: thumbnail || "null",
-          // categories: categories || "null",
+          thumbnail: thumbnailUrl,
+          categories: categories || [],
         },
       }),
     ]);
@@ -356,7 +356,11 @@ export const getDocumentsByCategoryController = async (
     const { category } = req.params;
 
     const documents = await prisma.publishedDocuments.findMany({
-      where: { categories: category },
+      where: {
+        categories: {
+          has: category,
+        },
+      },
     });
 
     return res

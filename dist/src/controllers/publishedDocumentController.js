@@ -42,8 +42,7 @@ export const searchPublishedDocumentsController = async (req, res) => {
         // Search by Category
         if (category) {
             whereClause.categories = {
-                contains: category,
-                mode: "insensitive",
+                has: category,
             };
         }
         // Search by Author (name or ID)

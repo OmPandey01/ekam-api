@@ -51,7 +51,7 @@ model PublishedDocuments {
   document_id       String
   author_id         String
   thumbnail         String         @default("null")
-  categories        String[]         @default([])
+  categories        String         @default("null")
   views             Int            @default(0)
   appreciationCount Int            @default(0)
   appreciations     Appreciation[]

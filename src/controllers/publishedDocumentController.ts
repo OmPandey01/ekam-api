@@ -58,8 +58,7 @@ export const searchPublishedDocumentsController = async (
     // Search by Category
     if (category) {
       whereClause.categories = {
-        contains: category as string,
-        mode: "insensitive",
+        has: category as string,
       };
     }
 
