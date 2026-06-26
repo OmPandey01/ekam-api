@@ -157,6 +157,18 @@ export const publishDocumentController = async (req: any, res: Response) => {
     const { id } = req.params;
     const { title, thumbnailUrl, categories } = req.body;
 
+    let finalCategories: string[] = [];
+    if (Array.isArray(categories)) {
+      finalCategories = categories;
+    } else if (typeof categories === 'string' && categories !== 'null' && categories !== 'undefined' && categories.trim() !== '') {
+      try {
+        const parsed = JSON.parse(categories);
+        finalCategories = Array.isArray(parsed) ? parsed : [categories];
+      } catch (e) {
+        finalCategories = categories.includes(',') ? categories.split(',').map(c => c.trim()) : [categories];
+      }
+    }
+
     const userId = req.user.userId;
 
     const document = await prisma.documents.findUnique({
@@ -197,7 +209,7 @@ export const publishDocumentController = async (req: any, res: Response) => {
           document_id: document.id, // Maps to Documents.id
           author_id: userId,
           thumbnail: thumbnailUrl,
-          categories: categories || [],
+          categories: finalCategories,
         },
       }),
     ]);
