@@ -209,6 +209,7 @@ export const publishDocumentController = async (req: any, res: Response) => {
     });
   } catch (error) {
     console.error("Publish Document Error:", error);
+    if (error.cause) console.error("Cause:", JSON.stringify(error.cause, null, 2));
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });
