@@ -17,7 +17,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL_ekam,
   process.env.FRONTEND_URL,
-  "http://localhost:3000",
+  // "http://localhost:3000",
 ]; // Removes undefined, null, or ""
 
 const corsOptions = {
@@ -25,7 +25,6 @@ const corsOptions = {
     origin: string | undefined,
     callback: (err: Error | null, allow?: boolean) => void,
   ) => {
-    // Allow requests with no origin (like mobile apps, curl, or Postman)
     if (!origin) {
       return callback(null, true);
     }
@@ -42,7 +41,6 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Apply middleware
 app.use(cors(corsOptions));
 app.get("/", (req, res) => {
   res.send("Hello World!");

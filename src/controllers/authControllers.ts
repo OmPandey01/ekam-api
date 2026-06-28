@@ -160,7 +160,41 @@ export async function otpVerificationController(req, res) {
       where: { id: userId },
       data: { isVerified: true },
     });
-    res.status(200).json({ message: "OTP verified successfully" });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        isVerified: user.isVerified,
+        name: user.name,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "5d" },
+    );
+    //set http only cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+    });
+
+    const response: LoginResponse = {
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      isVerified: user.isVerified,
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });

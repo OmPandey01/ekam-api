@@ -133,6 +133,19 @@ export const publishDocumentController = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, thumbnailUrl, categories } = req.body;
+        let finalCategories = [];
+        if (Array.isArray(categories)) {
+            finalCategories = categories;
+        }
+        else if (typeof categories === 'string' && categories !== 'null' && categories !== 'undefined' && categories.trim() !== '') {
+            try {
+                const parsed = JSON.parse(categories);
+                finalCategories = Array.isArray(parsed) ? parsed : [categories];
+            }
+            catch (e) {
+                finalCategories = categories.includes(',') ? categories.split(',').map(c => c.trim()) : [categories];
+            }
+        }
         const userId = req.user.userId;
         const document = await prisma.documents.findUnique({
             where: { document_id_author_id: { document_id: id, author_id: userId } },
@@ -168,7 +181,7 @@ export const publishDocumentController = async (req, res) => {
                     document_id: document.id, // Maps to Documents.id
                     author_id: userId,
                     thumbnail: thumbnailUrl,
-                    categories: categories || [],
+                    categories: finalCategories,
                 },
             }),
         ]);
@@ -180,6 +193,8 @@ export const publishDocumentController = async (req, res) => {
     }
     catch (error) {
         console.error("Publish Document Error:", error);
+        if (error.cause)
+            console.error("Cause:", JSON.stringify(error.cause, null, 2));
         return res
             .status(500)
             .json({ success: false, message: "Internal Server Error" });
